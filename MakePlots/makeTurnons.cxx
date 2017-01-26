@@ -71,6 +71,9 @@ void makeTurnons(const int & CHUNK, const int & NJOBS, const int & NENT, const b
         auto sums = event->GetPEvent()->fSums;
 
         double l1MetBE = event->fL1Met;
+	double l1MetBEEmu = event->fL1EmuMet;
+	double l1MetBERecalcEmu = event->fRecalcL1EmuMet;
+	double l1MetBERecalc = event->fRecalcL1Met;
         double caloMetBE = sums->caloMetBE;
         double l1Htt = event->fL1Htt;
         double recoHtt = sums->Ht;
@@ -79,6 +82,24 @@ void makeTurnons(const int & CHUNK, const int & NJOBS, const int & NENT, const b
         if( event->fMetFilterPassFlag )
             if( turnons.find("metBE") != turnons.end() )
                 turnons["metBE"]->Fill(caloMetBE, l1MetBE);
+	
+	
+        //----- MET Emu-----//
+        if( event->fMetFilterPassFlag )
+            if( turnons.find("metBEEmu") != turnons.end() )
+                turnons["metBEEmu"]->Fill(caloMetBE, l1MetBEEmu);
+	
+
+	//----- MET Recalc -----//
+        if( event->fMetFilterPassFlag )
+	  if( turnons.find("metBERecalc") != turnons.end() )
+	    turnons["metBERecalc"]->Fill(caloMetBE, l1MetBERecalc);
+	
+
+	//----- MET Recalc Emu-----//
+        if( event->fMetFilterPassFlag )
+	  if( turnons.find("metBERecalcEmu") != turnons.end() )
+	    turnons["metBERecalcEmu"]->Fill(caloMetBE, l1MetBERecalcEmu);
 
         //----- HTT -----//
         if( turnons.find("htt") != turnons.end() )

@@ -9,6 +9,8 @@
 #include "ntuple_cfg.h"
 
 TL1Turnon metBE(ntuple_cfg const * dataset);
+TL1Turnon metBERecalc(ntuple_cfg const * dataset);
+TL1Turnon metBERecalcEmu(ntuple_cfg const * dataset);
 TL1Turnon htt(ntuple_cfg const * dataset);
 std::vector<double> metBins();
 std::vector<double> mhtBins();
@@ -20,6 +22,9 @@ std::map< std::string, TL1Turnon* > sumTurnons(ntuple_cfg const * dataset)
 {
     std::map< std::string, TL1Turnon* > turnons;
     turnons.emplace("metBE", new TL1Turnon(metBE(dataset)));
+    turnons.emplace("metBERecalc", new TL1Turnon(metBERecalc(dataset)));
+    turnons.emplace("metBEEmu", new TL1Turnon(metBE(dataset)));
+    turnons.emplace("metBERecalcEmu", new TL1Turnon(metBERecalcEmu(dataset)));
     turnons.emplace("htt", new TL1Turnon(htt(dataset)));
     return turnons;
 }
@@ -33,6 +38,57 @@ TL1Turnon metBE(ntuple_cfg const * dataset)
     std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
     turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
     turnon.SetSeed(seed, "L1 MET BE");
+    turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
+    turnon.SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
+    turnon.SetXBins(metBins());
+    turnon.SetOutName(outName);
+    turnon.SetFit(dataset->doFit);
+    return turnon;
+}
+
+// caloMetBE and l1MetBE seeds
+TL1Turnon metBERecalc(ntuple_cfg const * dataset)
+{
+    TL1Turnon turnon;
+    std::string seed = "l1MetBESeedRecalc";
+    std::string xparam = "caloMetBERecalc";
+    std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
+    turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
+    turnon.SetSeed(seed, "L1MET RE");
+    turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
+    turnon.SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
+    turnon.SetXBins(metBins());
+    turnon.SetOutName(outName);
+    turnon.SetFit(dataset->doFit);
+    return turnon;
+}
+
+// caloMetBE and l1MetBE seeds
+TL1Turnon metBEEmu(ntuple_cfg const * dataset)
+{
+    TL1Turnon turnon;
+    std::string seed = "l1MetBESeedEmu";
+    std::string xparam = "caloMetBEEmu";
+    std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
+    turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
+    turnon.SetSeed(seed, "L1 MET EM");
+    turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
+    turnon.SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
+    turnon.SetXBins(metBins());
+    turnon.SetOutName(outName);
+    turnon.SetFit(dataset->doFit);
+    return turnon;
+}
+
+// caloMetBE and l1MetBE seeds
+TL1Turnon metBERecalcEmu(ntuple_cfg const * dataset)
+{
+    TL1Turnon turnon;
+    std::string seed = "l1MetBESeedRecalcEmu";
+    std::string xparam = "caloMetBERecalcEmu";
+    std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
+    turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
+    turnon.SetSeed(seed, "L1MET REM");
     turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
     turnon.SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
     turnon.SetXBins(metBins());
@@ -65,12 +121,12 @@ vector<double> metBins()
     //for(double binLowerEdge=  0.0; binLowerEdge< 200.1; binLowerEdge+= 2.0) temp.push_back(binLowerEdge);
 
     for(double binLowerEdge=  0.0; binLowerEdge< 40.0; binLowerEdge+=  2.0) temp.push_back(binLowerEdge);
-    for(double binLowerEdge= 40.0; binLowerEdge< 70.0; binLowerEdge+=  5.0) temp.push_back(binLowerEdge);
-    for(double binLowerEdge= 70.0; binLowerEdge< 90.0; binLowerEdge+= 10.0) temp.push_back(binLowerEdge);
-    for(double binLowerEdge= 90.0; binLowerEdge<150.0; binLowerEdge+= 20.0) temp.push_back(binLowerEdge);
-    for(double binLowerEdge=150.0; binLowerEdge<300.0; binLowerEdge+= 50.0) temp.push_back(binLowerEdge);
-    for(double binLowerEdge=300.0; binLowerEdge<400.0; binLowerEdge+=100.0) temp.push_back(binLowerEdge);
-    for(double binLowerEdge=400.0; binLowerEdge<800.1; binLowerEdge+=200.0) temp.push_back(binLowerEdge);
+    for(double binLowerEdge= 40.0; binLowerEdge< 80.0; binLowerEdge+=  5.0) temp.push_back(binLowerEdge);
+    //for(double binLowerEdge= 60.0; binLowerEdge< 90.0; binLowerEdge+= 10.0) temp.push_back(binLowerEdge);
+    for(double binLowerEdge= 80.0; binLowerEdge<120.0; binLowerEdge+= 10.0) temp.push_back(binLowerEdge);
+    for(double binLowerEdge=120.0; binLowerEdge<300.0; binLowerEdge+= 20.0) temp.push_back(binLowerEdge);
+    //for(double binLowerEdge=300.0; binLowerEdge<400.0; binLowerEdge+=100.0) temp.push_back(binLowerEdge);
+    //for(double binLowerEdge=400.0; binLowerEdge<800.1; binLowerEdge+=200.0) temp.push_back(binLowerEdge);
 
     return temp;
 }

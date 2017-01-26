@@ -58,14 +58,25 @@ void makeRates(const int & CHUNK, const int & NJOBS, const int & NENT, const boo
         event->GetEntry(i);
         TL1Progress::PrintProgressBar(i-start, end-start);
 
-        //int pu = event->GetPEvent()->fVertex->nVtx;
+        int pu = event->GetPEvent()->fVertex->nVtx;
+	std::cout << "Pileup = " << pu << std::endl;
+	if(pu<40) continue;
 
         // Get the relevant event parameters
         double l1MetBE = event->fL1Met;
+	double l1MetBEEmu = event->fL1EmuMet;
+	double l1MetBERecalcEmu = event->fRecalcL1EmuMet;
+	double l1MetBERecalc = event->fRecalcL1Met;
         double l1MetHF = event->fL1MetHF;
 
         if( rates.find("l1MetBE") != rates.end() )
             rates["l1MetBE"]->Fill(l1MetBE, 0.);
+	if( rates.find("l1MetBEEmu") != rates.end() )
+            rates["l1MetBEEmu"]->Fill(l1MetBEEmu, 0.);
+	if( rates.find("l1MetBERecalc") != rates.end() )
+            rates["l1MetBERecalc"]->Fill(l1MetBERecalc, 0.);
+	if( rates.find("l1MetBERecalcEmu") != rates.end() )
+	  rates["l1MetBERecalcEmu"]->Fill(l1MetBERecalcEmu, 0.);
         if( rates.find("l1MetHF") != rates.end() )
             rates["l1MetHF"]->Fill(l1MetHF, 0.);
     }

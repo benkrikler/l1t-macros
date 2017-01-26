@@ -56,7 +56,6 @@ ntuple_cfg singleMuPeriodH(TString outDirBase)
     return config;
 }
 
-
 // Single Muon run 276243
 ntuple_cfg singleMuRun276243()
 {

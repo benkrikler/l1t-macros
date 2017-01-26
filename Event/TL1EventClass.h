@@ -395,17 +395,25 @@ void TL1EventClass::GetRecalcL1EmuMet()
 {
     TVector2 met(0.0,0.0), metHF(0.0,0.0);
     auto caloTowers = fPrimitiveEvent->fEmuCaloTowers;
+    int nTow = caloTowers->nTower;
     int ieta(0);
-    double phi(0.0), et(0.0);
+    double phi(0.0), et(0.0), pusEt(0.0);
     for(int jTower=0; jTower<caloTowers->nTower; ++jTower)
     {
         ieta = caloTowers->ieta[jTower];
         phi = (TMath::Pi()/36.0) * (double)caloTowers->iphi[jTower];
         et = 0.5 * (double)caloTowers->iet[jTower];
-        TVector2 temp(0.0,0.0);
-        temp.SetMagPhi(et,phi);
+	TVector2 temp(0.0,0.0);
 
-        if( abs(ieta) <= 28 ) met -= temp;
+	if(abs(ieta)==28){
+	  pusEt = 1 + et - 0.5*round((1./8)*pow((et-0.5),0.5)*(floor(nTow/128)));
+	  if(pusEt<0) pusEt = 0.5;
+	  temp.SetMagPhi(pusEt,phi);
+	  if((et-pusEt)>2) std::cout << "nTow = " << nTow << ", ~nvtx = " << nTow/20 << ", Et orig = " << et << ", et pu sub = " << pusEt << std::endl;
+	}else{
+	  temp.SetMagPhi(et,phi);
+	}
+	if( abs(ieta) <= 28 ) met -= temp;
         metHF -= temp;
     }
     fRecalcL1EmuMet = met.Mod();
