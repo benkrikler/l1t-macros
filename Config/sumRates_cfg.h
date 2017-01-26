@@ -9,6 +9,9 @@
 #include "ntuple_cfg.h"
 
 TL1Rates l1MetBE(ntuple_cfg const * dataset);
+TL1Rates l1MetBERecalc(ntuple_cfg const * dataset);
+TL1Rates l1MetBEEmu(ntuple_cfg const * dataset);
+TL1Rates l1MetBERecalcEmu(ntuple_cfg const * dataset);
 TL1Rates l1MetHF(ntuple_cfg const * dataset);
 std::vector<double> metBins();
 
@@ -17,6 +20,9 @@ std::map< std::string, TL1Rates* > sumRates(ntuple_cfg const * dataset)
 {
     std::map< std::string, TL1Rates* > rates;
     rates.emplace("l1MetBE", new TL1Rates(l1MetBE(dataset)));
+    rates.emplace("l1MetBERecalc", new TL1Rates(l1MetBERecalc(dataset)));
+    rates.emplace("l1MetBEEmu", new TL1Rates(l1MetBEEmu(dataset)));
+    rates.emplace("l1MetBERecalcEmu", new TL1Rates(l1MetBERecalcEmu(dataset)));
     rates.emplace("l1MetHF", new TL1Rates(l1MetHF(dataset)));
     return rates;
 }
@@ -26,6 +32,45 @@ TL1Rates l1MetBE(ntuple_cfg const * dataset)
 {
     TL1Rates rate;
     std::string xparam = "l1MetBE";
+    std::string outName = dataset->triggerName+"_"+xparam;
+    rate.SetX(xparam, "L1 Central E_{T}^{miss} (GeV)");
+    rate.SetXBins(metBins());
+    rate.SetOutName(dataset->triggerName+"_"+xparam);
+    rate.SetOverwriteNames(dataset->baseOWdir+"/Rates/rate_"+outName+".root", "rate_"+xparam);
+    return rate;
+}
+
+// l1 MET BE Hw Recalc
+TL1Rates l1MetBERecalc(ntuple_cfg const * dataset)
+{
+    TL1Rates rate;
+    std::string xparam = "l1MetBeRecalc";
+    std::string outName = dataset->triggerName+"_"+xparam;
+    rate.SetX(xparam, "L1 Central E_{T}^{miss} (GeV)");
+    rate.SetXBins(metBins());
+    rate.SetOutName(dataset->triggerName+"_"+xparam);
+    rate.SetOverwriteNames(dataset->baseOWdir+"/Rates/rate_"+outName+".root", "rate_"+xparam);
+    return rate;
+}
+
+// l1 MET BE Emu 
+TL1Rates l1MetBEEmu(ntuple_cfg const * dataset)
+{
+    TL1Rates rate;
+    std::string xparam = "l1MetBEEmu";
+    std::string outName = dataset->triggerName+"_"+xparam;
+    rate.SetX(xparam, "L1 Central E_{T}^{miss} (GeV)");
+    rate.SetXBins(metBins());
+    rate.SetOutName(dataset->triggerName+"_"+xparam);
+    rate.SetOverwriteNames(dataset->baseOWdir+"/Rates/rate_"+outName+".root", "rate_"+xparam);
+    return rate;
+}
+
+// l1 MET BE Emu Recalc
+TL1Rates l1MetBERecalcEmu(ntuple_cfg const * dataset)
+{
+    TL1Rates rate;
+    std::string xparam = "l1MetBERecalcEmu";
     std::string outName = dataset->triggerName+"_"+xparam;
     rate.SetX(xparam, "L1 Central E_{T}^{miss} (GeV)");
     rate.SetXBins(metBins());

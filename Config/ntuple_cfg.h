@@ -19,6 +19,7 @@ struct ntuple_cfg {
     std::string outDir;
 };
 
+ntuple_cfg singleMuPeriodH();
 ntuple_cfg singleMuRun276243();
 ntuple_cfg singleMuRun281693();
 ntuple_cfg zeroBiasRun276653();
@@ -27,8 +28,34 @@ ntuple_cfg VBF_HInv();
 // The Ntuple cfg to use:
 ntuple_cfg GetNtuple_cfg()
 {
-    return singleMuRun276243();
+    return singleMuPeriodH();
 }
+
+
+ntuple_cfg singleMuPeriodH()
+{
+    ntuple_cfg config;
+    config.sampleName   = "Data";
+    config.sampleTitle  = "2016 Data";
+    config.triggerName  = "SingleMu";
+    config.triggerTitle = "Single Muon";
+    config.puFilename   = "";
+    config.run          = "Period H";
+    config.outDirBase   = "/afs/cern.ch/work/b/bundocka/L1TriggerStudiesOutput";
+    config.doFit        = false;
+    config.puType       = {"0PU9","10PU19","20PU29","30PU39","40PU49","50PU"};
+    config.puBins       = {0,10,20,30,40,50,999};
+    config.inFiles      = {"root://eoscms.cern.ch//eos/cms/store/group/dpg_trigger/"
+			   "comm_trigger/L1Trigger/L1Menu2016/Stage2/l1t-integration-v88p1-CMSSW-8021/"
+			   "SingleMuon/crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v2/161031_120512/0000/L1Ntuple_*.root"};
+    config.baseOWdir    = "/afs/cern.ch/work/b/bundocka/L1TriggerStudiesOutput"
+      "/20170120_"+config.sampleName+"_run-"+config.run+"_"+	\
+      config.triggerName+"_hadd/";
+    config.outDir       = config.outDirBase+"/"+TL1DateTime::GetDate()+"_"+ \
+      config.sampleName+"_run-"+config.run+"_"+config.triggerName;
+    return config;
+}
+
 
 // Single Muon run 276243
 ntuple_cfg singleMuRun276243()
