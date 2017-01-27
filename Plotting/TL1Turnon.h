@@ -26,7 +26,7 @@ class TL1Turnon : public TL1Plots
 
         virtual void InitPlots();
         virtual void OverwritePlots();
-        virtual void Fill(const double & xVal, const double & seedVal, const int & pu=0);
+        virtual void Fill(const double & xVal, const double & seedVal, const int & pu);
         virtual void DrawPlots();
         void DrawCmsStamp(std::string stampPos="Left");
         void DrawTurnons();
@@ -162,7 +162,7 @@ void TL1Turnon::DrawPlots()
 
     DrawCmsStamp();
 
-    std::string outName = Form("%s/dists_%s.pdf",this->GetOutDir().c_str(),this->GetOutName().c_str());
+    std::string outName = Form("%s/dists_%s.%s",this->GetOutDir().c_str(),this->GetOutName().c_str(),this->GetOutExtension().c_str());
     can->SaveAs(outName.c_str());
     delete can;
 }
@@ -274,7 +274,7 @@ void TL1Turnon::DrawTurnons()
         //latex->SetTextFont(42);
         //latex->DrawLatex(0.65,0.41,this->GetAddMark().c_str());
 
-        std::string puOutName = Form("%s/effs_%s_puBins_seed%i.pdf",this->GetOutDir().c_str(),this->GetOutName().c_str(),(int)fSeeds[i]);
+        std::string puOutName = Form("%s/effs_%s_puBins_seed%i.%s",this->GetOutDir().c_str(),this->GetOutName().c_str(),(int)fSeeds[i],this->GetOutExtension().c_str());
         puCan->SaveAs(puOutName.c_str());
         delete puCan;
     }
@@ -288,7 +288,7 @@ void TL1Turnon::DrawTurnons()
     nomlatex->SetTextAlign(31);
     //nomlatex->DrawLatex(0.8,0.15+0.2*(2+fSeeds.size())/5.0+0.02,"<PU>=14");
 
-    std::string nomOutName = Form("%s/effs_%s.pdf",this->GetOutDir().c_str(),this->GetOutName().c_str());
+    std::string nomOutName = Form("%s/effs_%s.%s",this->GetOutDir().c_str(),this->GetOutName().c_str(),this->GetOutExtension().c_str());
     nomCan->SaveAs(nomOutName.c_str());
     delete nomCan;
 }

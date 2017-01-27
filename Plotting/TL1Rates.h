@@ -22,10 +22,10 @@ class TL1Rates : public TL1Plots
         
         virtual void InitPlots();
         virtual void OverwritePlots();
-        virtual void Fill(const double & xVal, const double & yVal, const int & pu=0);
+        virtual void Fill(const double & xVal, const double & yVal, const int & pu);
         virtual void DrawPlots();
         TH1F * GetCumulative(TH1F * plot);
-        void PlotE2(TH1F * plot, bool puOn);
+        void PlotE2(TH1F * plot, int i_pu_bin);
         void DrawCmsStamp();
 
         void SetX(const std::string & xName, const std::string & xTitle);
@@ -87,13 +87,14 @@ void TL1Rates::OverwritePlots()
     delete rootFile;
 }
 
-void TL1Rates::Fill(const double & xVal, const double & yVal, const int & pu=0)
+void TL1Rates::Fill(const double & xVal, const double & yVal, const int & pu)
 {
     fPlot[0]->Fill(xVal,this->GetPuWeight(pu));
     for(int ipu=0; ipu<this->GetPuType().size(); ++ipu)
     {
-        if( pu >= this->GetPuBins()[ipu] && pu < this->GetPuBins()[ipu+1] )
+        if( pu >= this->GetPuBins()[ipu] && pu < this->GetPuBins()[ipu+1] ){
             fPlot[ipu+1]->Fill(xVal,this->GetPuWeight(pu));
+        }
     }
 }
 
@@ -108,12 +109,12 @@ void TL1Rates::DrawPlots()
     fRootFile->WriteTObject(fPlot[0]);
     fRootFile->WriteTObject(fCumulative);
 
-    PlotE2(fCumulative, false);
+    PlotE2(fCumulative, -1);
     can->SetLogy();
 
     DrawCmsStamp();
 
-    std::string outName = Form("%s/rates_%s.pdf",this->GetOutDir().c_str(),this->GetOutName().c_str());
+    std::string outName = Form("%s/rates_%s.%s",this->GetOutDir().c_str(),this->GetOutName().c_str(),this->GetOutExtension().c_str());
     can->SaveAs(outName.c_str());
     delete can;
 
@@ -126,13 +127,16 @@ void TL1Rates::DrawPlots()
         TH1F * fPuCumulative = GetCumulative(fPlot[ipu+1]);
 
         bin1 = fPuCumulative->GetBinContent(1);
-        fPuCumulative->Scale(4.0e7/bin1);
+        if (bin1 != 0) {
+            fPuCumulative->GetSumw2();
+            fPuCumulative->Scale(4.0e7/bin1);
+        }
         this->SetColor(fPuCumulative, ipu, this->GetPuType().size());
         fRootFile->WriteTObject(fPlot[ipu+1]);
         fRootFile->WriteTObject(fPuCumulative);
 
-        PlotE2(fPuCumulative, true);
-        can2->SetLogy();
+        if (bin1 ==0) continue;
+        PlotE2(fPuCumulative, ipu);
 
         std::stringstream entryName;
         if( ipu<this->GetPuType().size()-1 ) entryName << this->GetPuBins()[ipu] << " #leq PU < " << this->GetPuBins()[ipu+1];
@@ -145,7 +149,7 @@ void TL1Rates::DrawPlots()
     leg2->Draw();
     can2->Update();
 
-    outName = Form("%s/rates_%s_puBins.pdf", this->GetOutDir().c_str(), this->GetOutName().c_str());
+    outName = Form("%s/rates_%s_puBins.%s", this->GetOutDir().c_str(), this->GetOutName().c_str(),this->GetOutExtension().c_str());
     can2->SaveAs(outName.c_str());
     delete can2;
 }
@@ -169,21 +173,21 @@ TH1F * TL1Rates::GetCumulative(TH1F * plot)
     return temp;
 }
 
-void TL1Rates::PlotE2(TH1F * plot, bool puOn)
+void TL1Rates::PlotE2(TH1F * plot, int i_pu_bin)
 {
-    plot->SetLineColor(plot->GetLineColor()+15);
-    plot->SetFillColor(plot->GetLineColor()+15);
-    plot->SetMarkerStyle(0);
-    std::string extra = "";
-    if( puOn ) extra = "same";
-    plot->DrawCopy(Form("E2%s",extra.c_str()));
+    if( i_pu_bin == -1){
+        plot->SetFillColor(plot->GetLineColor());
+        plot->SetLineColor(plot->GetLineColor()+10);
+        plot->SetMarkerStyle(0);
+        plot->DrawCopy("E2");
+    }
 
+    std::string extra = "";
+    if( i_pu_bin != 0 ) extra = "same";
     plot->SetFillStyle(0);
-    plot->SetLineColor(plot->GetLineColor()-15);
-    plot->SetFillStyle(0);
+    plot->SetFillColor(0);
     plot->SetLineWidth(2);
-    plot->DrawCopy("histsame");
-    plot->SetFillStyle(1001);
+    plot->DrawCopy(("hist"+extra).c_str());
 }
 
 void TL1Rates::DrawCmsStamp()
