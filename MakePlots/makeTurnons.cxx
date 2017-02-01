@@ -71,7 +71,7 @@ void makeTurnons(const int & CHUNK, const int & NJOBS, const int & NENT, const b
                 continue;
         
         // Get the relevant event parameters
-        const int pu = 0 ; // event->GetPEvent()->fVertex->nVtx;
+        const int pu = event->GetPEvent()->fVertex->nVtx;
         auto sums = event->GetPEvent()->fSums;
 
         double l1MetBE = event->fL1Met;
