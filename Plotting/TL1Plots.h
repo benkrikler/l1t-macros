@@ -19,7 +19,8 @@ class TL1Plots
         virtual void InitPlots() = 0;
         virtual void OverwritePlots() = 0;
         virtual void Fill(const double & xVal, const double & yVal, const int & pu) = 0;
-        virtual void DrawPlots() = 0;
+        virtual void DrawPlots(const char* name_append=NULL) = 0;
+        virtual void NormaliseArea(double norm){ }
 
         virtual void SetOverwriteNames(const std::string & owRootName, const std::string & owHistName);
         virtual void SetSample(const std::string & sampleName, const std::string & sampleTitle);
@@ -169,6 +170,7 @@ void TL1Plots::SetColor(TH1 * obj, int pos, int max, bool setFill)
     obj->SetLineColor(colour);
     obj->SetMarkerColor(colour);
     if(setFill) obj->SetFillColor(colour);
+    else        obj->SetFillColor(0);
 }
 
 void TL1Plots::SetColor(TGraph * obj, int pos, int max, bool setFill)
@@ -177,6 +179,7 @@ void TL1Plots::SetColor(TGraph * obj, int pos, int max, bool setFill)
     obj->SetLineColor(colour);
     obj->SetMarkerColor(colour);
     if(setFill) obj->SetFillColor(colour);
+    else        obj->SetFillColor(0);
 }
 
 std::string TL1Plots::GetOverwriteRootFilename() const

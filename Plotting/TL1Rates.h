@@ -10,6 +10,7 @@
 #include <TLegend.h>
 #include <TFile.h>
 #include <TLatex.h>
+#include <TMath.h>
 #include <TStyle.h>
 
 #include "TL1Plots.h"
@@ -23,7 +24,7 @@ class TL1Rates : public TL1Plots
         virtual void InitPlots();
         virtual void OverwritePlots();
         virtual void Fill(const double & xVal, const double & yVal, const int & pu);
-        virtual void DrawPlots();
+        virtual void DrawPlots(const char* name_append="");
         TH1F * GetCumulative(TH1F * plot);
         void PlotE2(TH1F * plot, int i_pu_bin);
         void DrawCmsStamp();
@@ -98,7 +99,7 @@ void TL1Rates::Fill(const double & xVal, const double & yVal, const int & pu)
     }
 }
 
-void TL1Rates::DrawPlots()
+void TL1Rates::DrawPlots( const char* name_append)
 {
     TCanvas * can(new TCanvas(Form("can_%f",this->GetRnd()),""));
     TH1F * fCumulative = GetCumulative(fPlot[0]);
