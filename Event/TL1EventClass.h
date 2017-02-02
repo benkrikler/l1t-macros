@@ -429,7 +429,7 @@ void TL1EventClass::GetRecalcL1EmuMet()
 	  pusEt = 1 + et - 0.5*round((1./8)*pow((et-0.5),0.5)*(floor(nTow/128)));
 	  if(pusEt<0) pusEt = 0.5;
 	  temp.SetMagPhi(pusEt,phi);
-	  if((et-pusEt)>2) std::cout << "nTow = " << nTow << ", ~nvtx = " << nTow/20 << ", Et orig = " << et << ", et pu sub = " << pusEt << std::endl;
+	  //if((et-pusEt)>2) std::cout << "nTow = " << nTow << ", ~nvtx = " << nTow/20 << ", Et orig = " << et << ", et pu sub = " << pusEt << std::endl;
 	}else{
 	  temp.SetMagPhi(et,phi);
 	}
