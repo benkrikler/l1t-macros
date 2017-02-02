@@ -58,7 +58,7 @@ void makePlots(const int & CHUNK, const int & NJOBS, const int & NENT, const boo
     {
         event->GetEntry(i);
         TL1Progress::PrintProgressBar(i-start, end-start);
-	FillPlots(i,event);
+	FillPlots(i,plots,event);
     }
 
     for(auto plot: plots)
