@@ -21,7 +21,7 @@ PlotList MakePlots(ntuple_cfg* dataset){
     std::string outName = dataset->triggerName;
 
     double met_max=100;
-    int met_bins=50;
+    int met_bins=25;
     int phi_bins=72;
 
     // Tower 28 MET
@@ -59,20 +59,29 @@ PlotList MakePlots(ntuple_cfg* dataset){
 
 void FillPlots(int i_entry, PlotList& plots, const TL1EventClass* event){
         const int pu = event->GetPEvent()->fVertex->nVtx;
-	//cout<<"Pile-up: "<<pu<<endl;
-	// Skip events with less than 5 pile-up at this point
-	if(pu<5) return; 
+    //cout<<"Pile-up: "<<pu<<endl;
+    // Skip events with less than 5 pile-up at this point
+    if(pu<5) return; 
 
-	const double& total_met=event->fRecalcL1Met;
-	const double met_28=event->fMet28.met();
-	const double met_28_phi=event->fMet28.phi()/TMath::Pi()*180;
-	const double met_not_28=event->fMetNot28.met();
+    const double& total_met=event->fRecalcL1Met;
+    const double met_28=event->fMet28.met();
+    const double met_28_phi=event->fMet28.phi()/TMath::Pi()*180;
+    const double met_not_28=event->fMetNot28.met();
 
-	auto iplot=plots.find("tower28MET");    if(iplot!=plots.end()) iplot->second->Fill(met_28,    1,pu);
+    auto iplot=plots.find("tower28MET");    if(iplot!=plots.end()) iplot->second->Fill(met_28,    1,pu);
          iplot=plots.find("totalMET");      if(iplot!=plots.end()) iplot->second->Fill(total_met, 1,pu);
          iplot=plots.find("totalNot28MET"); if(iplot!=plots.end()) iplot->second->Fill(met_not_28,1,pu);
     if (met_28>0){
          iplot=plots.find("tower28METPhi"); if(iplot!=plots.end()) iplot->second->Fill(met_28_phi,1,pu);
+    }
+}
+
+void Finalize(PlotList& plots){
+    for(auto plot: plots){
+        plot.second->DrawPlots();
+        plot.second->NormaliseArea(1.);
+        plot.second->SetDrawOption("histnostack");
+        plot.second->DrawPlots("norm");
     }
 }
 

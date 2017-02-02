@@ -58,11 +58,11 @@ void makePlots(const int & CHUNK, const int & NJOBS, const int & NENT, const boo
     {
         event->GetEntry(i);
         TL1Progress::PrintProgressBar(i-start, end-start);
-	FillPlots(i,plots,event);
+        FillPlots(i,plots,event);
     }
 
-    for(auto plot: plots)
-        plot.second->DrawPlots();
+    cout<<"Finalize plots: "<<endl;
+    Finalize(plots);
     std::cout << "Output saved in:\n\t" << outDir << std::endl;
 }
 
