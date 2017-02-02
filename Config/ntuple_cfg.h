@@ -41,7 +41,7 @@ ntuple_cfg singleMuPeriodH(TString outDirBase)
     config.triggerName  = "SingleMu";
     config.triggerTitle = "Single Muon";
     config.puFilename   = "";
-    config.run          = "Period H";
+    config.run          = "PeriodH";
     config.outDirBase   = outDirBase;
     config.doFit        = false;
     config.puType       = {"0PU9","10PU19","20PU29","30PU39","40PU49","50PU"};
