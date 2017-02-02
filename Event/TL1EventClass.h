@@ -38,9 +38,22 @@ class TL1EventClass
         bool fMuonFilterPassFlag, fMetFilterPassFlag;
         std::vector<bool> fJetFilterPassFlags;
         
+        struct MissingEt{
+            TVector2 fMET;
+            double phi()const{return fMET.Phi();}
+            double met()const{return fMET.Mod();}
+            void AddEt(double Et, double phi){
+                TVector2 temp(0.0,0.0);
+                temp.SetMagPhi(Et,phi);
+                fMET-=temp;
+            }
+            void Reset(){ fMET.Set(0.,0.); }
+        };
+
         // Recalc L1 MET sums
         double fRecalcL1Met, fRecalcL1MetPhi;
         double fRecalcL1MetHF, fRecalcL1MetPhiHF;
+        MissingEt fMet28, fMetNot28, fMetNot28HF;
 
         double fRecalcL1EmuMet, fRecalcL1EmuMetPhi;
         double fRecalcL1EmuMetHF, fRecalcL1EmuMetPhiHF;
@@ -370,25 +383,32 @@ void TL1EventClass::GetRecalcL1Ett()
 
 void TL1EventClass::GetRecalcL1Met()
 {
-    TVector2 met(0.0,0.0), metHF(0.0,0.0);
+    MissingEt met, metHF;
+    fMet28.Reset(); fMetNot28.Reset(); fMetNot28HF.Reset();
     auto caloTowers = fPrimitiveEvent->fCaloTowers;
     int ieta(0);
-    double phi(0.0), et(0.0);
     for(int jTower=0; jTower<caloTowers->nTower; ++jTower)
     {
         ieta = caloTowers->ieta[jTower];
-        phi = (TMath::Pi()/36.0) * (double)caloTowers->iphi[jTower];
-        et = 0.5 * (double)caloTowers->iet[jTower];
-        TVector2 temp(0.0,0.0);
-        temp.SetMagPhi(et,phi);
+        double phi = (TMath::Pi()/36.0) * (double)caloTowers->iphi[jTower];
+        double et = 0.5 * (double)caloTowers->iet[jTower];
 
-        if( abs(ieta) <= 28 ) met -= temp;
-        metHF -= temp;
+        if( abs(ieta) < 28 ) {
+            met.AddEt(et,phi);
+            fMetNot28.AddEt(et,phi);
+            fMetNot28HF.AddEt(et,phi);
+        } else if( abs(ieta) == 28 ){
+            met.AddEt(et,phi);
+            fMet28.AddEt(et,phi);
+        } else{
+            fMetNot28HF.AddEt(et,phi);
+        }
+        metHF.AddEt(et,phi);
     }
-    fRecalcL1Met = met.Mod();
-    fRecalcL1MetPhi = met.Phi();
-    fRecalcL1MetHF = metHF.Mod();
-    fRecalcL1MetPhiHF = metHF.Phi();
+    fRecalcL1Met = met.met();
+    fRecalcL1MetPhi = met.phi();
+    fRecalcL1MetHF = metHF.met();
+    fRecalcL1MetPhiHF = metHF.phi();
 }
 
 void TL1EventClass::GetRecalcL1EmuMet()
