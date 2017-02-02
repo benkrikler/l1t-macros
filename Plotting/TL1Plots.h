@@ -32,10 +32,14 @@ class TL1Plots
         virtual void SetPuType(const std::vector<std::string> & puType);
         virtual void SetPuBins(const std::vector<int> & puBins);
         virtual void SetPuFile(const std::string & puFileName);
-        void SetColor(TH1 * obj, int pos, int max);
-        void SetColor(TGraph * obj, int pos, int max);
+        void SetColor(TH1 * obj, int pos, int max, bool setFill=false);
+        void SetColor(TGraph * obj, int pos, int max, bool setFill=false);
+        int CalculateColor(int pos,int max);
 
         double GetPuWeight(int pu);
+
+        std::string GetDrawOption()const{return fDrawOption;}
+        void SetDrawOption(const std::string& opts){ fDrawOption=opts;}
 
     public:
         std::string GetOverwriteRootFilename() const;
@@ -65,6 +69,7 @@ class TL1Plots
         std::string fAddMark;
         std::vector<std::string> fPuType;
         std::vector<int> fPuBins;
+        std::string fDrawOption;
 
 };
 
@@ -144,8 +149,7 @@ void TL1Plots::SetPuFile(const std::string & puFileName)
     delete fPuFile;
 }
 
-void TL1Plots::SetColor(TH1 * obj, int pos, int max)
-{
+int TL1Plots::CalculateColor(int pos,int max){
     double modifier(0.15), colorIndex;
     int colour(1);
     double fraction = (double)(pos)/(double)(max-1);
@@ -156,24 +160,23 @@ void TL1Plots::SetColor(TH1 * obj, int pos, int max)
         colorIndex = (fraction * (1.0-2.0*modifier) + modifier) * gStyle->GetNumberOfColors();
         colour = gStyle->GetColorPalette(colorIndex);
     }
-    obj->SetLineColor(colour);
-    obj->SetMarkerColor(colour);
+    return colour;
 }
 
-void TL1Plots::SetColor(TGraph * obj, int pos, int max)
+void TL1Plots::SetColor(TH1 * obj, int pos, int max, bool setFill)
 {
-    double modifier(0.15), colorIndex;
-    int colour(1);
-    double fraction = (double)(pos)/(double)(max-1);
-
-    if( pos > max-1 || pos < 0 || max < 0 ) colour = 1;
-    else
-    {
-        colorIndex = (fraction * (1.0-2.0*modifier) + modifier) * gStyle->GetNumberOfColors();
-        colour = gStyle->GetColorPalette(colorIndex);
-    }
+    int colour=CalculateColor(pos,max);
     obj->SetLineColor(colour);
     obj->SetMarkerColor(colour);
+    if(setFill) obj->SetFillColor(colour);
+}
+
+void TL1Plots::SetColor(TGraph * obj, int pos, int max, bool setFill)
+{
+    int colour=CalculateColor(pos,max);
+    obj->SetLineColor(colour);
+    obj->SetMarkerColor(colour);
+    if(setFill) obj->SetFillColor(colour);
 }
 
 std::string TL1Plots::GetOverwriteRootFilename() const
