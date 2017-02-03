@@ -2,6 +2,9 @@
 #define TL1PRIMITIVEEVENTCLASS_H
 
 #include <string>
+#include <iostream>
+using std::cout;
+using std::endl;
 
 #include "TL1DataClass.h"
 
@@ -37,7 +40,7 @@ class TL1PrimitiveEventClass
     public:
         TL1PrimitiveEventClass(std::vector<std::string> inDir);
         bool Next();
-        void GetEntry(int i);
+        int GetEntry(int i);
 
         unsigned GetNEntries() const;
         unsigned GetPosition() const;
@@ -119,7 +122,7 @@ bool TL1PrimitiveEventClass::Next()
     return true;
 }
 
-void TL1PrimitiveEventClass::GetEntry(int i)
+int TL1PrimitiveEventClass::GetEntry(int i)
 {
     if( fIsCaloTower ) caloTower->LoadTree(i);
     if( fIsEmuCaloTower ) emuCaloTower->LoadTree(i);
@@ -130,14 +133,20 @@ void TL1PrimitiveEventClass::GetEntry(int i)
     if( fIsUpgrade ) upgrade->LoadTree(i);
     if( fIsEmuUpgrade ) emuUpgrade->LoadTree(i);
 
-    if( fIsCaloTower ) caloTower->GetEntry(i);
-    if( fIsEmuCaloTower ) emuCaloTower->GetEntry(i);
-    if( fIsJetReco ) jetReco->GetEntry(i);
-    if( fIsMetFilterReco ) metFilterReco->GetEntry(i);
-    if( fIsMuonReco ) muonReco->GetEntry(i);
-    if( fIsRecoTree ) recoTree->GetEntry(i);
-    if( fIsUpgrade ) upgrade->GetEntry(i);
-    if( fIsEmuUpgrade ) emuUpgrade->GetEntry(i);
+    bool problem=false;
+    if( fIsCaloTower ) problem|=caloTower->GetEntry(i)<0;
+    if( fIsEmuCaloTower ) problem|=emuCaloTower->GetEntry(i)<0;
+    if( fIsJetReco ) problem|=jetReco->GetEntry(i)<0;
+    if( fIsMetFilterReco )problem|= metFilterReco->GetEntry(i)<0;
+    if( fIsMuonReco ) problem|=muonReco->GetEntry(i)<0;
+    if( fIsRecoTree ) problem|=recoTree->GetEntry(i)<0;
+    if( fIsUpgrade ) problem|=upgrade->GetEntry(i)<0;
+    if( fIsEmuUpgrade ) problem|=emuUpgrade->GetEntry(i)<0;
+    if(problem){
+        cout<<"TL1PrimitiveEventClass::GetEntry(): Problem loading entry: "<<i<<endl;
+        return -1;
+    }
+    return 1;
 }
 
 unsigned TL1PrimitiveEventClass::GetNEntries() const
