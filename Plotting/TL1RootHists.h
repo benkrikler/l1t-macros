@@ -39,6 +39,8 @@ class TL1RootHist : public TL1Plots
         TH1* GetTemplatePlot()const{return fTemplatePlot;}
         int GetNDimensions()const{return fNDimensions;}
 
+        static void SetLogY(bool on=true){fsLogY=on;}
+
     private:
         void MakePlot(const TString name);
         void FillPlot(TH1* hist,const double xVal,const double yVal,const double pu_weight);
@@ -47,8 +49,10 @@ class TL1RootHist : public TL1Plots
         std::vector<TH1*> fPlot;
         TFile * fRootFile;
         int fNDimensions;
-
+        static bool fsLogY;
 };
+
+bool TL1RootHist::fsLogY=false;
 
 TL1RootHist::~TL1RootHist()
 {
@@ -130,7 +134,7 @@ void TL1RootHist::DrawPlots(const char* name_append) {
     
     fRootFile->WriteTObject(fPlot[0],Form("%s%s",fPlot[0]->GetName(),appendage.c_str()));
     fPlot[0]->Draw();
-    can->SetLogy();
+    can->SetLogy(fsLogY);
     DrawCmsStamp();
     TLatex* title=new TLatex(0.64,0.87,fTemplatePlot->GetTitle());
     title->SetNDC();
@@ -162,7 +166,7 @@ void TL1RootHist::DrawPlots(const char* name_append) {
     stack->Draw(GetDrawOption().c_str());
     stack->GetXaxis()->SetTitle(fTemplatePlot->GetXaxis()->GetTitle());
     stack->GetYaxis()->SetTitle(fTemplatePlot->GetYaxis()->GetTitle());
-    can2->SetLogy();
+    can2->SetLogy(fsLogY);
     DrawCmsStamp();
     leg2->Draw();
     title->DrawClone();
