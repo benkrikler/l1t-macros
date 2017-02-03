@@ -6,7 +6,6 @@
 #include "../Utilities/TL1Progress.C"
 
 #include "../Config/ntuple_cfg.h"
-#include "../Config/sumRates_cfg.h"
 
 #include "../Debug/DebugHandler.h"
 
@@ -58,7 +57,7 @@ void makePlots(const int & CHUNK, const int & NJOBS, const int & NENT, const boo
     {
         event->GetEntry(i);
         TL1Progress::PrintProgressBar(i-start, end-start);
-        FillPlots(i,plots,event);
+        FillPlots(i,plots,event,dataset);
     }
 
     cout<<"Finalize plots: "<<endl;
