@@ -27,7 +27,7 @@ class TL1Turnon : public TL1Plots
         virtual void InitPlots();
         virtual void OverwritePlots();
         virtual void Fill(const double & xVal, const double & seedVal, const int & pu);
-        virtual void DrawPlots();
+        virtual void DrawPlots(const char* name_append=NULL);
         void DrawCmsStamp(std::string stampPos="Left");
         void DrawTurnons();
         void DrawCmsStampTurnon(const double & max);
@@ -134,7 +134,7 @@ void TL1Turnon::Fill(const double & xVal, const double & seedVal, const int & pu
     }
 }
 
-void TL1Turnon::DrawPlots()
+void TL1Turnon::DrawPlots(const char* name_append)
 {
     TCanvas * can(new TCanvas(Form("can_%f",this->GetRnd()),"")); 
     TLegend * leg(new TLegend(0.58,0.35,0.88,0.55));
@@ -164,6 +164,7 @@ void TL1Turnon::DrawPlots()
 
     std::string outName = Form("%s/dists_%s.%s",this->GetOutDir().c_str(),this->GetOutName().c_str(),this->GetOutExtension().c_str());
     can->SaveAs(outName.c_str());
+    DrawTurnons();
     delete can;
 }
 
