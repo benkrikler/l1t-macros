@@ -114,7 +114,6 @@ void makeTurnons(const int & CHUNK, const int & NJOBS, const int & NENT, const b
     for(auto it=turnons.begin(); it!=turnons.end(); ++it)
     {
         it->second->DrawPlots();
-        it->second->DrawTurnons();
     }
     cout << "Output saved in:\n" << outDir << endl;
 }
