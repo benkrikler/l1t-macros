@@ -11,6 +11,8 @@
 
 // CHUNK = which chunk of root-files to run over
 // NJOBS = number of jobs to submit
+
+
 void makePlots(const int & CHUNK, const int & NJOBS, const int & NENT, const bool & COMBINE)
 {
     // Check CHUNK < NJOBS
@@ -22,7 +24,8 @@ void makePlots(const int & CHUNK, const int & NJOBS, const int & NENT, const boo
 
     // Get config objects
     ntuple_cfg * dataset = new ntuple_cfg(GetNtuple_cfg());
-    auto plots = MakePlots(dataset);
+    PlotList plots;
+    MakePlots(dataset,plots);
 
     std::vector<std::string> inDir = dataset->inFiles;
     std::string outDir( dataset->outDir+"_hadd/Rates/" );

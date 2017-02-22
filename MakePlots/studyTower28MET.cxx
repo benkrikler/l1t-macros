@@ -1,6 +1,7 @@
 #include "../Plotting/TL1RootHists.h"
 #include "../Plotting/TL1Rates.h"
 #include "../Plotting/TL1Turnon.h"
+#include "../Plotting/METHists.h"
 #include "../Event/TL1EventClass.h"
 #include "../Config/ntuple_cfg.h"
 #include "../Config/sumTurnons_cfg.h"
@@ -12,82 +13,55 @@
 using std::cout;
 using std::endl;
 
-typedef std::map<std::string,TL1Plots*> PlotList;
-PlotList MakePlots(ntuple_cfg*);
+//void MakePlots(ntuple_cfg*,PlotList& plots);
 void FillPlots(int i_entry, PlotList& plots, const TL1EventClass*);
 
-PlotList MakePlots(ntuple_cfg* dataset){
-    PlotList plots;
+void MakePlots(ntuple_cfg* dataset,PlotList& plots){
+    plots.clear();
 
-    std::string outName = dataset->triggerName;
+    METHists* recalcL1EmuMet           =new METHists("RecalcL1EmuMet"           , "Default MET, all barrel towers"                   , "L1MET(Barrel)"        ); 
+    METHists* recalcL1EmuMetHF         =new METHists("RecalcL1EmuMetHF"         , "Default MET, all barrel + forward towers"         , "L1MET(Barrel+Fwd)"    ); 
+    METHists* recalcL1EmuMet28Only     =new METHists("RecalcL1EmuMet28Only"     , "MET in only |ieta|=28"                            , "L1MET(|ieta|=28)"    ); 
+    METHists* recalcL1EmuMetNot28      =new METHists("RecalcL1EmuMetNot28"      , "MET with |ieta|<28"                               , "L1MET(|ieta|<28)"  ); 
+    METHists* recalcL1EmuMetPUS        =new METHists("RecalcL1EmuMetPUS"        , "MET with PUS"                                     , "L1MET(Barrel) PUS"    ); 
+    METHists* recalcL1EmuMetPUSHF      =new METHists("RecalcL1EmuMetPUSHF"      , "MET with PUS + forward towers"                    , "L1MET(Barrel+Fwd) PUS"); 
+    METHists* recalcL1EmuMetPUS28      =new METHists("RecalcL1EmuMetPUS28"      , "MET with PUS for |ieta|=28"                       , "L1MET(Barrel) PUS28"  ); 
+    METHists* recalcL1EmuMetPUSThresh  =new METHists("RecalcL1EmuMetPUSThresh"  , "MET with PUS & E_{T} threshold"                   , "L1MET(Barrel) PUS+Threshold"); 
+    METHists* recalcL1EmuMetPUSThreshHF=new METHists("RecalcL1EmuMetPUSThreshHF", "MET with PUS & E_{T} threshold and forward towers", "L1MET(Barrel+Fwd) PUS28+Threshold"  ); 
+    METHists* recalcL1Met              =new METHists("RecalcL1Met"           , "(Not Emu.) Default MET, all barrel towers"              , "L1MET raw (Barrel)"        ); 
+    METHists* recalcL1Met28Only        =new METHists("RecalcL1Met28Only"     , "(Not Emu.) MET in only |ieta|=28"                       , "L1MET raw (|ieta|=28)"    ); 
 
-    double met_max=100;
-    int met_bins=25;
-    int phi_bins=36;
-
-    // tmp variables that we use below
-    std::string name;
-    TH1* tmpl_hist;
-
-    // Tower 28 MET
-    name = "tower28METNotEmu";
-    tmpl_hist=new TH1F(name.c_str(),"#splitline{MET from towers}{with |ieta|=28}; MET (GeV)",met_bins,0,met_max);
-    plots.emplace(name,new TL1RootHist(tmpl_hist));
-
-    // Tower 28 MET Emulated
-    name = "tower28MET";
-    tmpl_hist=new TH1F(name.c_str(),"#splitline{Emul. MET from towers}{with |ieta|=28}; MET (GeV)",met_bins,0,met_max);
-    plots.emplace(name,new TL1RootHist(tmpl_hist));
+    recalcL1EmuMet           ->Register(dataset,plots);
+    recalcL1EmuMetHF         ->Register(dataset,plots);
+    recalcL1EmuMet28Only     ->Register(dataset,plots);
+    recalcL1EmuMetNot28      ->Register(dataset,plots);
+    recalcL1EmuMetPUS        ->Register(dataset,plots);
+    recalcL1EmuMetPUSHF      ->Register(dataset,plots);
+    recalcL1EmuMetPUS28      ->Register(dataset,plots);
+    recalcL1EmuMetPUSThresh  ->Register(dataset,plots);
+    recalcL1EmuMetPUSThreshHF->Register(dataset,plots); 
+    recalcL1Met              ->Register(dataset,plots);
+    recalcL1Met28Only        ->Register(dataset,plots);
 
     // Tower 28 MET Phi
-    name = "tower28METPhi";
-    tmpl_hist=new TH1F(name.c_str(),"#splitline{Phi of Emul. MET from towers}{with |ieta|=28}; Phi (#circ)",phi_bins,0,360);
+    int phi_bins=18;
+    std::string name = "tower28METPhi";
+    TH1* tmpl_hist=new TH1F(name.c_str(),"#splitline{Phi of Emul. MET from towers}{with |ieta|=28}; Phi (#circ)",phi_bins,0,360);
     plots.emplace(name,new TL1RootHist(tmpl_hist));
-
-    // MET in all towers
-    name = "totalMETNotEmu";
-    tmpl_hist=new TH1F(name.c_str(),"MET from all towers (not emulated); MET (GeV)",met_bins,0,met_max);
-    plots.emplace(name,new TL1RootHist(tmpl_hist));
-
-    // Emulated MET in all towers
-    name = "totalMET";
-    tmpl_hist=new TH1F(name.c_str(),"Emul. MET from all towers; MET (GeV)",met_bins,0,met_max);
-    plots.emplace(name,new TL1RootHist(tmpl_hist));
-
-    // MET in all towers except 28
-    name = "totalNot28MET";
-    tmpl_hist=new TH1F(name.c_str(),"#splitline{Emul. MET from all towers}{except |ieta|=28}; MET (GeV)",met_bins,0,met_max);
-    plots.emplace(name,new TL1RootHist(tmpl_hist));
-
-    std::string overwrite_dir=dataset->baseOWdir+"/studyTower28MET/dists_";
-    for(auto plot : plots){
-        plot.second->SetDrawOption("hist");
-    }
 
     auto turnon_plots=sumTurnons(dataset);
     plots.insert(turnon_plots.begin(),turnon_plots.end());
 
-    name = "turnonL1MetNo28";
-    TL1Turnon* turnonL1MetNo28=new TL1Turnon;
-    std::string seed = "recalcL1MetNot28";
-    std::string xparam = "caloMetBERecalc";
-    turnonL1MetNo28->SetSeed(seed, "L1 MET !28");
-    turnonL1MetNo28->SetSeeds({0., 40., 60., 80., 100., 120.});
-    turnonL1MetNo28->SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
-    turnonL1MetNo28->SetXBins(metBins());
-    turnonL1MetNo28->SetFit(dataset->doFit);
-    plots.emplace(name,turnonL1MetNo28);
-
+    std::string overwrite_dir=dataset->baseOWdir+"/studyTower28MET/";
+    std::string outName = dataset->triggerName;
     for(auto plot : plots){
         plot.second->SetOverwriteNames(overwrite_dir+outName+".root", name);
         plot.second->SetOutName(outName+"_"+plot.first);
-        plot.second->SetOutExtension("png");
+        plot.second->SetOutExtension("pdf");
     }
-
-    return plots;
 }
 
-static int my_count=0, my_fill_count=0;
+static int my_count=0, my_fill_count=0, fRecalcL1Met_nonZero=0;
 
 void FillPlots(int i_entry, PlotList& plots, const TL1EventClass* event, const ntuple_cfg* dataset){
     ++my_count;
@@ -97,33 +71,34 @@ void FillPlots(int i_entry, PlotList& plots, const TL1EventClass* event, const n
     if( dataset->triggerName == "SingleMu" and not event->fMuonFilterPassFlag ) return;
     if( not event->fMetFilterPassFlag ) return;
     ++my_fill_count;
+    if(event->fRecalcL1Met >0) ++fRecalcL1Met_nonZero;
 
-    const double& total_met_notEmu=event->fRecalcL1Met;
-    const double& total_met=event->fRecalcL1EmuMet;
-    const double met_28_notEmu=event->fRecalcL1Met28.met();
-    const double met_28=event->fRecalcL1MetEmu28.met();
-    const double met_28_phi=event->fRecalcL1MetEmu28.phi()/TMath::Pi()*180;
-    const double met_not_28=event->fRecalcL1MetEmuNot28.met();
-
+    auto sums = event->GetPEvent()->fSums;
+    const double& caloMetBE = sums->caloMetBE;
     PlotList::iterator iplot;
-    // MET distributions
-    iplot=plots.find("tower28MET"     ); if(iplot!=plots.end()) iplot->second->Fill(met_28           , 1 , pu ); 
-    iplot=plots.find("tower28METNotEmu");if(iplot!=plots.end()) iplot->second->Fill(met_28           , 1 , pu ); 
-    iplot=plots.find("totalMETNotEmu" ); if(iplot!=plots.end()) iplot->second->Fill(total_met_notEmu , 1 , pu ); 
-    iplot=plots.find("totalMET"       ); if(iplot!=plots.end()) iplot->second->Fill(total_met        , 1 , pu ); 
-    iplot=plots.find("totalNot28MET"  ); if(iplot!=plots.end()) iplot->second->Fill(met_not_28       , 1 , pu ); 
+    iplot=plots.find("RecalcL1EmuMet"           ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMet.met()           ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1EmuMetHF"         ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMetHF.met()         ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1EmuMet28Only"     ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMet28Only.met()     ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1EmuMetNot28"      ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMetNot28.met()      ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1EmuMetPUS"        ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMetPUS.met()        ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1EmuMetPUSHF"      ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMetPUSHF.met()      ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1EmuMetPUS28"      ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMetPUS28.met()      ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1EmuMetPUSThresh"  ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMetPUSThresh.met()  ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1EmuMetPUSThreshHF"); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1EmuMetPUSThreshHF.met(),caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1Met"              ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1Met                    ,caloMetBE, pu ); 
+    iplot=plots.find("RecalcL1Met28Only"        ); if(iplot!=plots.end()) iplot->second->Fill(event->fRecalcL1Met28Only.met()        ,caloMetBE, pu ); 
+
+    const double met_28=event->fRecalcL1EmuMet28Only.met();
     if (met_28>0){
+        const double met_28_phi=event->fRecalcL1EmuMet28Only.phi()/TMath::Pi()*180;
         iplot=plots.find("tower28METPhi"); if(iplot!=plots.end()) iplot->second->Fill(met_28_phi     , 1 , pu );
     }
 
     // Turnon curves
-    auto sums = event->GetPEvent()->fSums;
-    const double& caloMetBE = sums->caloMetBE;
-    iplot=plots.find("metBE"           ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , event->fL1Met    , pu ); 
-    iplot=plots.find("metBEEmu"        ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , event->fL1EmuMet , pu ); 
-    iplot=plots.find("metBERecalc"     ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , total_met_notEmu , pu ); 
-    iplot=plots.find("metBERecalcEmu"  ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , total_met        , pu ); 
-    iplot=plots.find("turnonL1MetNo28" ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , met_not_28       , pu ); 
+    iplot=plots.find("metBE"           ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , event->fL1Met                , pu );
+    iplot=plots.find("metBEEmu"        ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , event->fL1EmuMet             , pu );
+    iplot=plots.find("metBERecalc"     ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , event->fRecalcL1Met          , pu );
+    iplot=plots.find("metBERecalcEmu"  ); if(iplot!=plots.end()) iplot->second->Fill(caloMetBE , event->fRecalcL1EmuMet.met() , pu );
 }
 
 void Finalize(PlotList& plots){
@@ -139,6 +114,7 @@ void Finalize(PlotList& plots){
     }
     cout<<"Tried FillPlots() "<<my_count<<" times"<<endl;
     cout<<"Called Fill "<<my_fill_count<<" times"<<endl;
+    cout<<"fRecalcL1Met_nonZero:  "<<fRecalcL1Met_nonZero<<endl;
 }
 
 #include "../MakePlots/makePlots.cxx"
