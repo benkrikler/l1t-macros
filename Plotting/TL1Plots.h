@@ -33,9 +33,9 @@ class TL1Plots
         virtual void SetPuType(const std::vector<std::string> & puType);
         virtual void SetPuBins(const std::vector<int> & puBins);
         virtual void SetPuFile(const std::string & puFileName);
-        void SetColor(TH1 * obj, int pos, int max, bool setFill=false);
-        void SetColor(TGraph * obj, int pos, int max, bool setFill=false);
-        int CalculateColor(int pos,int max);
+        void SetColor(TH1 * obj, double pos, double max, bool setFill=false);
+        void SetColor(TGraph * obj, double pos, double max, bool setFill=false);
+        int CalculateColor(double pos,double max);
 
         double GetPuWeight(int pu);
 
@@ -150,10 +150,10 @@ void TL1Plots::SetPuFile(const std::string & puFileName)
     delete fPuFile;
 }
 
-int TL1Plots::CalculateColor(int pos,int max){
+int TL1Plots::CalculateColor(double pos,double max){
     double modifier(0.15), colorIndex;
     int colour(1);
-    double fraction = (double)(pos)/(double)(max-1);
+    double fraction = pos/(max-1);
 
     if( pos > max-1 || pos < 0 || max < 0 ) colour = 1;
     else
@@ -164,7 +164,7 @@ int TL1Plots::CalculateColor(int pos,int max){
     return colour;
 }
 
-void TL1Plots::SetColor(TH1 * obj, int pos, int max, bool setFill)
+void TL1Plots::SetColor(TH1 * obj, double pos, double max, bool setFill)
 {
     int colour=CalculateColor(pos,max);
     obj->SetLineColor(colour);
@@ -173,7 +173,7 @@ void TL1Plots::SetColor(TH1 * obj, int pos, int max, bool setFill)
     else        obj->SetFillColor(0);
 }
 
-void TL1Plots::SetColor(TGraph * obj, int pos, int max, bool setFill)
+void TL1Plots::SetColor(TGraph * obj, double pos, double max, bool setFill)
 {
     int colour=CalculateColor(pos,max);
     obj->SetLineColor(colour);
