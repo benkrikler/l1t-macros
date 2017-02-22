@@ -54,11 +54,17 @@ class TL1EventClass
         // Recalc L1 MET sums
         double fRecalcL1Met, fRecalcL1MetPhi;
         double fRecalcL1MetHF, fRecalcL1MetPhiHF;
-        MissingEt fRecalcL1Met28, fRecalcL1MetNot28, fRecalcL1MetNot28HF;
+        MissingEt fRecalcL1Met28Only, fRecalcL1MetNot28, fRecalcL1MetNot28HF;
 
-        MissingEt fRecalcL1MetEmu28, fRecalcL1MetEmuNot28;
-        double fRecalcL1EmuMet, fRecalcL1EmuMetPhi;
-        double fRecalcL1EmuMetHF, fRecalcL1EmuMetPhiHF;
+        MissingEt fRecalcL1EmuMet;
+        MissingEt fRecalcL1EmuMetHF;
+        MissingEt fRecalcL1EmuMet28Only;
+        MissingEt fRecalcL1EmuMetNot28;
+        MissingEt fRecalcL1EmuMetPUS;
+        MissingEt fRecalcL1EmuMetPUS28;
+        MissingEt fRecalcL1EmuMetPUSHF;
+        MissingEt fRecalcL1EmuMetPUSThresh;
+        MissingEt fRecalcL1EmuMetPUSThreshHF;
 
         // Recalc L1 Ht/Et Sums
         double fRecalcL1Mht, fRecalcL1MhtPhi;
@@ -144,10 +150,18 @@ void TL1EventClass::Reset(){
         // Recalc L1 MET sums
         fRecalcL1Met=fRecalcL1MetPhi=0;
         fRecalcL1MetHF=fRecalcL1MetPhiHF=0;
-        fRecalcL1Met28.Reset();fRecalcL1MetNot28.Reset();fRecalcL1MetNot28HF.Reset();
+        fRecalcL1Met28Only.Reset();fRecalcL1MetNot28.Reset();fRecalcL1MetNot28HF.Reset();
 
-        fRecalcL1EmuMet=fRecalcL1EmuMetPhi=0;
-        fRecalcL1EmuMetHF=fRecalcL1EmuMetPhiHF=0;
+        fRecalcL1EmuMet.Reset();
+        fRecalcL1EmuMetHF.Reset();
+        fRecalcL1EmuMet28Only.Reset();
+        fRecalcL1EmuMetNot28.Reset();
+        fRecalcL1EmuMetPUS.Reset();
+        fRecalcL1EmuMetPUS28.Reset();
+        fRecalcL1EmuMetPUSHF.Reset();
+        fRecalcL1EmuMetPUSThresh.Reset();
+        fRecalcL1EmuMetPUSThreshHF.Reset();
+
 
         // Recalc L1 Ht/Et Sums
         fRecalcL1Mht=fRecalcL1MhtPhi=0;
@@ -425,12 +439,11 @@ void TL1EventClass::GetRecalcL1Ett()
 void TL1EventClass::GetRecalcL1Met()
 {
     MissingEt met, metHF;
-    fRecalcL1Met28.Reset(); fRecalcL1MetNot28.Reset(); fRecalcL1MetNot28HF.Reset();
+    fRecalcL1Met28Only.Reset(); fRecalcL1MetNot28.Reset(); fRecalcL1MetNot28HF.Reset();
     auto caloTowers = fPrimitiveEvent->fCaloTowers;
-    int ieta(0);
     for(int jTower=0; jTower<caloTowers->nTower; ++jTower)
     {
-        ieta = caloTowers->ieta[jTower];
+        int ieta = caloTowers->ieta[jTower];
         double phi = (TMath::Pi()/36.0) * (double)caloTowers->iphi[jTower];
         double et = 0.5 * (double)caloTowers->iet[jTower];
 
@@ -440,7 +453,7 @@ void TL1EventClass::GetRecalcL1Met()
             fRecalcL1MetNot28HF.AddEt(et,phi);
         } else if( abs(ieta) == 28 ){
             met.AddEt(et,phi);
-            fRecalcL1Met28.AddEt(et,phi);
+            fRecalcL1Met28Only.AddEt(et,phi);
         } else{
             fRecalcL1MetNot28HF.AddEt(et,phi);
         }
@@ -453,43 +466,57 @@ void TL1EventClass::GetRecalcL1Met()
 }
 
 void TL1EventClass::GetRecalcL1EmuMet() {
-    TVector2 met_old(0.0,0.0), metHF(0.0,0.0);
-    MissingEt met;
+    MissingEt met,metHF;
     auto caloTowers = fPrimitiveEvent->fEmuCaloTowers;
     const int nTow = caloTowers->nTower;
-    fRecalcL1MetEmu28.Reset(); 
-    fRecalcL1MetEmuNot28.Reset(); 
-    
+
+    int nTT4=0;
+    for(int jTower=0; jTower<caloTowers->nTower; ++jTower)
+        if(abs(caloTowers->ieta[jTower])<5) ++nTT4;
+
+    static const double etaSizes[] = 
+            {1.72, 2.05, 1.72, 4.02, 3.29, 2.01, 2.02, 2.00,  
+             2.02, 2.  , 2.03, 1.99, 2.01, 2.03, 1.99, 3.47}; 
+
     for(int jTower=0; jTower<caloTowers->nTower; ++jTower) {
         const int ieta = caloTowers->ieta[jTower];
         const double phi = (TMath::Pi()/36.0) * (double)caloTowers->iphi[jTower];
-        double et = 0.5 * (double)caloTowers->iet[jTower];
-        TVector2 temp(0.0,0.0);
+        const double et = 0.5 * (double)caloTowers->iet[jTower];
+        double et_pus28only=et;
+        double et_pusAll=et;
 
+        // Calculate PUS
         if(abs(ieta)==28){
-          et = 1 + et - 0.5*round((1./8)*pow((et-0.5),0.5)*(floor(nTow/128)));
-          if(et<0) et = 0.5;
+            //et_pus28only = 1 + et - 0.5*round((1./8)*pow((et-0.5),0.5)*(floor(nTow/128)));
+            et_pus28only = et - 0.5*round(7*(nTT4/100.)); 
+            if(et_pus28only<0) et_pus28only = 0;
         }
-        temp.SetMagPhi(et,phi);
+        if( abs(ieta) > 24 ){
+            et_pusAll = et - 0.5*round((etaSizes[abs(ieta)-25]/4)*7*(nTT4/100.));
+            if(et_pusAll < 0.) et_pusAll = 0.;
+        }
 
-        if( abs(ieta) < 28 ){
-            met.AddEt(et,phi);
-            met_old -= temp;
-            fRecalcL1MetEmuNot28.AddEt(et,phi);
-        } else if( abs(ieta) == 28 ){
-            met.AddEt(et,phi);
-            met_old -= temp;
-            fRecalcL1MetEmu28.AddEt(et,phi);
+        // MET sums
+        const double threshold_et=0.5*(round(abs(ieta)/10.)+1) ;
+        if( abs(ieta) <= 28 ){
+            fRecalcL1EmuMet.AddEt(et,phi);
+            fRecalcL1EmuMetPUS.AddEt(et_pusAll,phi);
+            fRecalcL1EmuMetPUS28.AddEt(et_pus28only,phi);
+            if (et > threshold_et){
+                fRecalcL1EmuMetPUSThresh.AddEt(et_pusAll,phi);
+            }
+            if( abs(ieta) < 28 ){
+                fRecalcL1EmuMetNot28.AddEt(et,phi);
+            } else if( abs(ieta) == 28 ){
+                fRecalcL1EmuMet28Only.AddEt(et,phi);
+            }
         }
-        metHF -= temp;
+        fRecalcL1EmuMetHF.AddEt(et,phi);
+        fRecalcL1EmuMetPUSHF.AddEt(et_pusAll,phi);
+        if (et > threshold_et){
+            fRecalcL1EmuMetPUSThreshHF.AddEt(et_pusAll,phi);
+        }
     }
-    if(met_old.Mod()!=met.met()) {
-        cout<<"GetRecalcL1EmuMet results differ: old = "<<met_old.Mod()<<", new = "<<met.met()<<endl;
-    }
-    fRecalcL1EmuMet = met.met();
-    fRecalcL1EmuMetPhi = met.phi();
-    fRecalcL1EmuMetHF = metHF.Mod();
-    fRecalcL1EmuMetPhiHF = metHF.Phi();
 }
 
 void TL1EventClass::GetRecalcRecoHtSums()
