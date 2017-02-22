@@ -17,6 +17,8 @@ std::vector<double> mhtBins();
 std::vector<double> ettBins();
 std::vector<double> httBins();
 
+static std::vector<double> metLevels={0,70,90,110};
+
 // All Sums Turnons
 std::map< std::string, TL1Turnon* > sumTurnons(ntuple_cfg const * dataset)
 {
@@ -38,7 +40,7 @@ TL1Turnon metBE(ntuple_cfg const * dataset)
     std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
     turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
     turnon.SetSeed(seed, "L1 MET BE");
-    turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
+    turnon.SetSeeds(metLevels);
     turnon.SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
     turnon.SetXBins(metBins());
     turnon.SetOutName(outName);
@@ -55,7 +57,7 @@ TL1Turnon metBERecalc(ntuple_cfg const * dataset)
     std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
     turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
     turnon.SetSeed(seed, "L1MET RE");
-    turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
+    turnon.SetSeeds(metLevels);
     turnon.SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
     turnon.SetXBins(metBins());
     turnon.SetOutName(outName);
@@ -72,7 +74,7 @@ TL1Turnon metBEEmu(ntuple_cfg const * dataset)
     std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
     turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
     turnon.SetSeed(seed, "L1 MET EM");
-    turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
+    turnon.SetSeeds(metLevels);
     turnon.SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
     turnon.SetXBins(metBins());
     turnon.SetOutName(outName);
@@ -89,7 +91,7 @@ TL1Turnon metBERecalcEmu(ntuple_cfg const * dataset)
     std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
     turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
     turnon.SetSeed(seed, "L1MET REM");
-    turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
+    turnon.SetSeeds(metLevels);
     turnon.SetX(xparam, "Offline E_{T}^{miss} BE (GeV)");
     turnon.SetXBins(metBins());
     turnon.SetOutName(outName);
@@ -106,7 +108,7 @@ TL1Turnon htt(ntuple_cfg const * dataset)
     std::string outName = dataset->triggerName+"_"+xparam+"_"+seed;
     turnon.SetOverwriteNames(dataset->baseOWdir+"/Turnons/dists_"+outName+".root", "dist_"+xparam+"_"+seed);
     turnon.SetSeed(seed, "L1 HTT");
-    turnon.SetSeeds({0., 40., 60., 80., 100., 120.});
+    turnon.SetSeeds(metLevels);
     turnon.SetX(xparam, "Offline Total H_{T} (GeV)");
     turnon.SetXBins(httBins());
     turnon.SetOutName(outName);
