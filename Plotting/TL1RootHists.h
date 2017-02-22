@@ -166,6 +166,10 @@ void TL1RootHist::DrawPlots(const char* name_append) {
     stack->Draw(GetDrawOption().c_str());
     stack->GetXaxis()->SetTitle(fTemplatePlot->GetXaxis()->GetTitle());
     stack->GetYaxis()->SetTitle(fTemplatePlot->GetYaxis()->GetTitle());
+    double y_max=stack->GetYaxis()->GetXmax();
+    double y_min=stack->GetYaxis()->GetXmin();
+    y_max+=0.1*(y_max-y_min);
+    stack->GetYaxis()->SetRangeUser(y_min,y_max);
     can2->SetLogy(fsLogY);
     DrawCmsStamp();
     leg2->Draw();
