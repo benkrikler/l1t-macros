@@ -26,8 +26,10 @@ class TL1DataClass
 TL1DataClass::TL1DataClass(std::string chainPath, std::vector<std::string> inDir) :
     fChain(new TChain(chainPath.c_str()))
 {
+    cout<<"Setting up chain: "<<chainPath<<endl;
     for (std::vector<std::string>::size_type i=0; i!=inDir.size(); ++i)
-        fNFiles = fChain->Add( Form("%s",inDir[i].c_str()), -1);
+        fNFiles = fChain->Add( Form("%s",inDir[i].c_str()));
+    //cout<<"Chain: "<<chainPath<<" has "<<fChain->GetEntries()<< " entries "<<endl;
 }
 
 Long64_t TL1DataClass::GetEntries()
