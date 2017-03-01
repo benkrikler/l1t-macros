@@ -43,12 +43,22 @@ ntuple_cfg singleMuPeriodH(TString outDirBase)
     config.puFilename   = "";
     config.run          = "PeriodH";
     config.outDirBase   = outDirBase;
-    config.doFit        = false;
+    config.doFit        = true;
     config.puType       = {"0PU9","10PU19","20PU29","30PU39","40PU49","50PU"};
     config.puBins       = {0,10,20,30,40,50,999};
-    config.inFiles      = {"root://eoscms.cern.ch//eos/cms/store/group/dpg_trigger/"
-			   "comm_trigger/L1Trigger/L1Menu2016/Stage2/l1t-integration-v88p1-CMSSW-8021/"
-			   "SingleMuon/crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v2/161031_120512/0000/L1Ntuple_4*.root"};
+//    config.inFiles      = {"/eos/cms/store/group/dpg_trigger/"
+//    //config.inFiles      = {"root://eoscms.cern.ch//eos/cms/store/group/dpg_trigger/"
+//			   "comm_trigger/L1Trigger/L1Menu2016/Stage2/l1t-integration-v88p1-CMSSW-8021/"
+//			   "SingleMuon/crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v2/161031_120512/0000/L1Ntuple_*.root"};
+     config.inFiles      = {"root://eoscms.cern.ch//eos/cms/store/group/dpg_trigger/"
+                           "comm_trigger/L1Trigger/L1Menu2016/Stage2/l1t-integration-v88p1-CMSSW-8021/"
+                           "SingleMuon/crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v2/161031_120512/0000/L1Ntuple_*.root",
+                           "root://eoscms.cern.ch///eos/cms/store/group/dpg_trigger/"
+                           "comm_trigger/L1Trigger/L1Menu2016/Stage2/l1t-integration-v88p1-CMSSW-8021/SingleMuon/"
+                           "crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v2/161031_120512/0001/L1Ntuple_*.root",
+                           "root://eoscms.cern.ch///eos/cms/store/group/dpg_trigger/"
+                           "comm_trigger/L1Trigger/L1Menu2016/Stage2/l1t-integration-v88p1-CMSSW-8021/SingleMuon/"
+                           "crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v2/161031_120512/0002/L1Ntuple_*.root"};
     config.baseOWdir    = outDirBase+ "/20170120_"+config.sampleName+"_run-"+config.run+"_"+	\
       config.triggerName+"_hadd/";
     config.outDir       = config.outDirBase+"/"+TL1DateTime::GetDate()+"_"+ \
